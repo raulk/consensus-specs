@@ -395,10 +395,11 @@ The following validations MUST pass before forwarding the
 `bid = block.body.signed_execution_payload_bid.message` where `block` is the
 `BeaconBlock` associated with `sidecar.beacon_block_root`:
 
-- _[IGNORE]_ A valid block for the sidecar's `slot` has been received via
-  gossip or non-gossip. Else, a client MUST queue the sidecar to resume
-  validation and possible processing once the condition is met.
-- _[REJECT]_ The sidecars's `slot` matches the slot of the block with root
+- _[IGNORE]_ A valid block for the sidecar's `slot` has been seen (via gossip
+  or non-gossip sources). If not yet seen, a client MUST queue the sidecar for
+  deferred validation and possible processing once the block is received or
+  retrieved.
+- _[REJECT]_ The sidecar's `slot` matches the slot of the block with root
   `beacon_block_root`.
 - _[REJECT]_ The sidecar is valid as verified by
   `verify_data_column_sidecar(sidecar, bid.blob_kzg_commitments)`.
@@ -410,8 +411,8 @@ The following validations MUST pass before forwarding the
   `(sidecar.beacon_block_root, sidecar.index)` with valid kzg proof.
 
 *Note:* If the sidecar fails deferred validation, its forwarding peers
-MUST be downscored retroactively. This may require changes to the gossip
-libraries. If it succeeds, the client MUST be re-broadcast it.
+MUST be downscored retroactively. If validation succeeds, the client
+MUST re-broadcast the sidecar.
 
 ##### Attestation subnets
 
